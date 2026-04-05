@@ -1,128 +1,103 @@
-/* CSS Resets */
-* {
-    box-sizing: border-box;
+body{
+    background-color: #E9E9E9;
+    cursor: url('images/cursor.png') 10 10, auto;
 }
 
-img {
-    max-width: 100%;
-    display: block;
-    height: auto;
-}
-
-/* Page styling */
-body {
-    background-color: #333;
-    color: rgb(235, 235, 235);
-    transition: all 2s;
-}
-
-body.switch {
-    background-color: rgb(235, 235, 235);
-    color: #333;
-}
-
-#container {
+#container{
+    width: 1200px;
+    height: 750px;
+    /* overflow: hidden; */
     position: relative;
-    width: 100%;
-    max-width: 1366px;
-    /* make sure the columns don't get too small and text stays readable */
-    min-width: 900px;
-    margin: 1em auto;
-    padding-top: 2em;
-}
-
-header {
-    margin: 0 auto 2em auto;
-}
-
-#banner {
-    position: relative;
-    display: flex;
-    width: 1100px;
-    height: 250px;
     margin: auto;
-    background-color: rgb(235, 235, 235);
-    color: #333;
-    overflow: hidden;
-    display: grid;
-	place-items: center;
 }
 
-#banner.switch {
-    background-color: #333;
-    color: rgb(235, 235, 235);
-    transition: all 2s;
-}
-
-main {
+main{
     display: flex;
-    justify-content: space-evenly;
-    margin: 1em auto;
-}
-
-main section {
-    flex: 1;
-    border: 1px rgb(235, 235, 235) dashed;
-    margin: 0 .25em;
-    padding: 1em;
-}
-
-a {
-    text-decoration: none;
-}
-
-nav ol, nav ul {
-    list-style-type: none;
-    margin-left: 0;
-    padding-left: 0;
-}
-
-section li {
-    padding-left: 1.2em;
-}
-
-section a {
-    line-height: 1.1em;
-    display: inline-block;
-    padding: .5em;
-    color: orange;
-}
-
-section a:hover {
-    background-color: orange;
-    color: #333;
-}
-
-section.switch a {
-    color: #333;
-}
-
-section.switch a:hover {
-    background-color: #333;
-    color: rgb(235, 235, 235);
-}
-
-button {
+    flex-direction: column;
     position: absolute;
-    top: 20px;
-    right: 20px;
-    padding: 12px;
-    background-color: orange;
-    color: #333;
-    border: 1px solid transparent;
+    gap: 16px;
+    left:0;
+    top:0;
+    padding-right: 50px;
+    padding-left: 50px;
+    padding-top: 10px;
+    transition: left 0.5s ease, right 0.5s ease;
 }
 
-button:hover {
-    background-color: coral;
-    cursor: pointer;
+ul {
+    display: flex;
+    text-decoration: none;
+    margin: 0;
+    padding: 0;
+    list-style-type: none;
+    gap: 4px;
 }
 
-button.switch {
-    background-color: rgb(235, 235, 235);
-    border-color: #333;
+#bottom {
+    position: fixed;        
+    left: 0;
+    bottom:0;                
+    width: 100vw;          
+    height: auto;
+    z-index: 0;
 }
 
-button.switch:hover {
-    background-color: #333;
-    color: rgb(235, 235, 235)
+#left {
+    position: fixed;
+    bottom:20px;
+    left:0;
+    z-index: 1;
+}
+
+#left-button {
+    position: fixed;
+    bottom:30px;
+    left:90px;
+    z-index: 2;
+}
+
+#right {
+    position: fixed;
+    bottom:20px;
+    right:0;
+    z-index: 1;
+}
+
+#right-button {
+    position: fixed;
+    bottom:30px;
+    right:90px;
+    z-index: 2;
+}
+
+#name {
+    position: fixed;
+    bottom:40px;
+    left: 50%;
+    transform: translate(-50%);
+    z-index: 3;
+}
+
+#class {
+    position: fixed;
+    bottom:150px;
+    left: 50%;
+    transform: translate(-50%);
+    z-index: 3;
+}
+
+#arrow-right {
+    position: absolute;
+    right:10px;
+    bottom: 50%;
+    z-index: 6;
+}
+
+#arrow-left {
+    position: absolute;
+    left:10px;
+    bottom: 50%;
+    transform: rotate(180deg);
+    z-index: 6;
+    display: none;
 }
