@@ -1,6 +1,11 @@
 body{
     background-color: #E9E9E9;
     cursor: url('images/cursor.png') 10 10, auto;
+    overflow: hidden;
+}
+
+a:hover {
+    cursor: url('images/cursor.png') 10 10, auto;
 }
 
 #container{
@@ -9,6 +14,16 @@ body{
     /* overflow: hidden; */
     position: relative;
     margin: auto;
+    transform-origin: top center;
+}
+
+/* glowing on hover */
+#container a img, #right-button {
+    transition: all 0.3s ease; 
+}
+
+#container a:hover img, #right-button:hover {
+    filter: drop-shadow(0 0 8px #36BFED)  
 }
 
 main{
@@ -88,14 +103,14 @@ ul {
 
 #arrow-right {
     position: absolute;
-    right:10px;
+    right:20px;
     bottom: 50%;
     z-index: 6;
 }
 
 #arrow-left {
     position: absolute;
-    left:10px;
+    left:20px;
     bottom: 50%;
     transform: rotate(180deg);
     z-index: 6;
