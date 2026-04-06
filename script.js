@@ -1,6 +1,9 @@
 (function() {
     'use strict';
 
+    document.querySelector('#background-music').play;
+
+
     //// click and swipe sounds setup here
     const clickSound = document.querySelector('#click-sound');
     const swipeSound = document.querySelector('#swipe-sound');
