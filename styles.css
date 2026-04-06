@@ -86,7 +86,6 @@ ul {
     right: 6vw;
 }
 
-
 #name {
     position: fixed;
     bottom: 5vh;
@@ -120,4 +119,16 @@ ul {
     transform: rotate(180deg);
     z-index: 6;
     display: none;
+}
+
+footer a {
+    position: absolute;
+    display: block;
+    top: 10px;
+    left: 10px;
+    z-index: 9;
+    margin: 0;
+    color: gray;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 12px;
 }
