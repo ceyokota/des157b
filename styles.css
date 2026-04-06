@@ -62,7 +62,7 @@ ul {
     position: fixed;
     bottom: 2vh;
     width: 15vw;   
-    height: 10vw;
+    height: auto;
 }
 #left {
     left: 0;
@@ -75,7 +75,7 @@ ul {
     position: fixed;
     bottom: 4vh;
     width: 8vw;   
-    height: 8vw;
+    height: auto;
 }
 
 #left-button {
@@ -92,8 +92,8 @@ ul {
     bottom: 5vh;
     left: 50%;
     transform: translateX(-50%);
-    width: 22vw;  /* was 315px */
-    height: 7vh;
+    width: 22vw; 
+    height: auto;
 }
 
 
@@ -102,8 +102,8 @@ ul {
     bottom: 21vh;
     left: 50%;
     transform: translateX(-50%);
-    width: 14vw;  /* was 222px */
-    height: 6vh;
+    width: 14vw;  
+    height: auto;
 }
 
 #arrow-right {
