@@ -19,7 +19,7 @@
 
     let isDarkMode = false;
     const rightButton = document.querySelector('#right-button');
-    const allImages = document.querySelectorAll('#container img');
+    const allImages = document.querySelectorAll('img');
 
     function toggleDarkMode() {
         playClickSound(); 

@@ -57,48 +57,53 @@ ul {
     z-index: 0;
 }
 
-#left {
+
+#left, #right {
     position: fixed;
-    bottom:20px;
-    left:0;
-    z-index: 1;
+    bottom: 2vh;
+    width: 15vw;   
+    height: 10vw;
+}
+#left {
+    left: 0;
+}
+#right {
+    right: 0;
+}
+
+#left-button, #right-button {
+    position: fixed;
+    bottom: 4vh;
+    width: 8vw;   
+    height: 8vw;
 }
 
 #left-button {
-    position: fixed;
-    bottom:30px;
-    left:90px;
-    z-index: 2;
-}
-
-#right {
-    position: fixed;
-    bottom:20px;
-    right:0;
-    z-index: 1;
+    left: 6vw;
 }
 
 #right-button {
-    position: fixed;
-    bottom:30px;
-    right:90px;
-    z-index: 2;
+    right: 6vw;
 }
+
 
 #name {
     position: fixed;
-    bottom:40px;
+    bottom: 5vh;
     left: 50%;
-    transform: translate(-50%);
-    z-index: 3;
+    transform: translateX(-50%);
+    width: 22vw;  /* was 315px */
+    height: 7vh;
 }
+
 
 #class {
     position: fixed;
-    bottom:140px;
+    bottom: 21vh;
     left: 50%;
-    transform: translate(-50%);
-    z-index: 3;
+    transform: translateX(-50%);
+    width: 14vw;  /* was 222px */
+    height: 6vh;
 }
 
 #arrow-right {
