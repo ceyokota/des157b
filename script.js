@@ -1,8 +1,9 @@
 (function() {
     'use strict';
 
-    document.querySelector('#background-music').play;
-
+    window.addEventListener('mousemove', function(){
+        document.querySelector('#background-music').play();
+    });
 
     //// click and swipe sounds setup here
     const clickSound = document.querySelector('#click-sound');
