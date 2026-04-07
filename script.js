@@ -1,6 +1,7 @@
 (function() {
     'use strict';
 
+    //// bacgkround music play when mousemoves here
     window.addEventListener('mousemove', function(){
         document.querySelector('#background-music').play();
     });
@@ -71,7 +72,7 @@
     }
 
 
-
+    //// scaling responsiveness
     function scaleContainer() {
         const container = document.querySelector('#container');
     
