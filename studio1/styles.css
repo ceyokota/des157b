@@ -55,6 +55,6 @@ section {
     transition: all 1s ease;
 }
 
-#myVideo {
+/* #myVideo {
     filter: saturate(180%) contrast(110%) brightness(110%);
-}
+} */

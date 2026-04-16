@@ -16,6 +16,7 @@
     const intervalID = setInterval(checkTime, 100);
 
 
+    //fullscreen button
     fs.addEventListener('click', function(){
         if (!document.fullscreenElement){
             document.documentElement.requestFullscreen();
@@ -24,6 +25,7 @@
         }
     })
 
+    //displays the different chunks of poem
     function checkTime(){
         for (let i=0; i < poem.start.length; i++) {
             if (poem.start[i] < myVideo.currentTime && myVideo.currentTime < poem.stop[i]) {
@@ -33,4 +35,19 @@
             }
         }
     }
+
+
+    //when mouse moves up/down, saturation changes
+    const video = document.querySelector("#myVideo");
+
+    document.addEventListener("mousemove", function (e) {
+        const y = e.clientY;
+        const height = window.innerHeight;
+      
+        const t = y / height;
+      
+        const saturation = 2 - t * 2;
+      
+        video.style.filter = "saturate(" + saturation + ")";
+      });
 })();
