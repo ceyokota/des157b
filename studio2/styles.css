@@ -1,0 +1,137 @@
+body {
+    background-color: rgba(244, 238, 238, 0.95);
+}
+
+#container {
+    background-color: white;
+    width: 1200px;  
+    height: 750px; 
+    margin: auto;
+    border-radius: 20px;
+    position: relative;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+h1 { 
+    margin-top: 50px; 
+    margin-bottom: 10px;
+    font-size: 42px; 
+    font-weight: 400; 
+}
+
+h2 { 
+    margin-top: 5px; 
+    color:#a3b0cd;
+    font-size: 24px; 
+    font-weight: 400;
+}
+
+p{
+    line-height: 1.6em;
+}
+
+.main-content {
+    position: relative;
+    width: 1050px;
+    height: 450px;
+    margin-top: 80px;
+}
+
+
+#chart-lines {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 430px; 
+    width: 100%;
+}
+
+.line-row {
+    display: flex;
+    align-items: center;
+    color: #333;
+}
+
+.line-row span {
+    width: 40px;
+    text-align: right;
+    margin-right: 15px;
+    font-size: 18px;
+}
+
+.line {
+    flex-grow: 1;
+    height: 1px;
+    background-color: #D4D4D4;
+}
+
+#graph {
+    position: absolute;
+    bottom: -26px; 
+    left: 55px;
+    right: 0;
+    height: 401px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.bar-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 80px;
+}
+
+.bar {
+    width: 75px;
+    background-color: #8699B0;
+    border: 2px solid #3D4C5E;
+    border-radius: 10px 10px 0 0;
+}
+
+.bar-group:hover .bar {
+    background-color: #a4b5cb; 
+    border-color: #64a3ff; 
+    background-color: #9cbce4;    
+    box-shadow: 0 4px 15px rgba(100, 163, 255, 0.3); 
+    cursor: pointer;
+}
+
+.bar-group:hover p {
+    color: #2d3748;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+
+
+.bar-group p {
+    margin-top: 15px;
+    font-size: 16px;
+}
+
+#textbox {
+    position: absolute;
+    top: 110px; 
+    width: 500px;
+    height: auto; 
+    background-color: rgba(244, 238, 238, 0.95);
+    border-radius: 15px;
+    border: 1px solid rgb(227, 216, 216);
+    padding: 10px 20px;
+    transition: opacity 0.3s ease;
+    pointer-events: none; 
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.hide {
+    opacity: 0;
+}
+
+.show {
+    opacity: 1;
+}
