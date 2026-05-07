@@ -1,18 +1,49 @@
-<html>
-    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-    <!-- we import arjs version without NFT but with marker + location based support -->
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-    <body style="margin : 0px; overflow: hidden;">
-        <a-scene embedded arjs>
-        <a-marker preset="hiro">
-            <!-- we use cors proxy to avoid cross-origin problems ATTENTION! you need to set up your server -->
-            <a-entity
-            position="0 0 0"
-            scale="0.05 0.05 0.05"
-            gltf-model="your-server/https://raw.githack.com/AR-js-org/AR.js/master/aframe/examples/image-tracking/nft/trex/scene.gltf"
-            ></a-entity>
-        </a-marker>
-        <a-entity camera></a-entity>
-        </a-scene>
-    </body>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Studio 3</title>
+    <link rel="stylesheet" href="styles.css">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/Draggable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/granim/2.0.0/granim.min.js"></script>
+
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <section>
+        <canvas id="granim-left" class="color-canvas" width="30" height="30"></canvas>
+        <h1>Help me remove my food allergies from this dish!!</h1>
+        <canvas id="granim-right" class="color-canvas" width="30" height="30"></canvas>
+    </section>
+    <h2>(drag and drop each item out of the salad!)</h2>
+
+    <img src="images/allergiessheet.png" id="allergies">
+
+    <div class="salad-container">
+        <img src="images/salad.png" class="salad-img">
+    
+        <img src="images/shrimp.png" class="ingredient" id="shellfish1">
+        <img src="images/shrimp.png" class="ingredient" id="shellfish2">
+        <img src="images/shrimp.png" class="ingredient" id="shellfish3">
+    
+        <img src="images/cheese.png" class="ingredient" id="cheese1">
+        <img src="images/cheese.png" class="ingredient" id="cheese2">
+        <img src="images/cheese.png" class="ingredient" id="cheese3">
+    
+        <img src="images/peanuts.png" class="ingredient" id="peanuts1">
+        <img src="images/peanuts.png" class="ingredient" id="peanuts2">
+        <img src="images/peanuts.png" class="ingredient" id="peanuts3">
+    </div>
+
+    <div id="success-modal" class="modal">
+        <div class="modal-content">
+            <h3>Mission Success!</h3>
+            <p>The dish is now allergy-free.</p>
+            <button id="reset-btn">Reset salad!</button>
+        </div>
+    </div>
+</body>
 </html>
