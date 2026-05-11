@@ -1,0 +1,21 @@
+html {
+    background-color: rgb(236, 245, 245);
+    padding: 20px;
+}
+body {
+    padding: 40px;
+    width: 600px;
+    margin: auto;
+    background-color: white;
+    border-radius: 20px;
+}
+
+h1, p {
+    margin: 0;
+    padding: 0;
+}
+
+p {
+    line-height: 1.3em;
+    padding-top: 20px;
+}
