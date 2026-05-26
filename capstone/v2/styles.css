@@ -1,21 +1,71 @@
+/* setup */
+
 body {
+    margin: 0;
     background-color: #313131;
     color: white;
     font-family: "DM Sans", sans-serif;
 }
 
+#container {
+    background-color: #313131;
+    width: 1200px;
+    height: 100vh;
+    max-height: 750px;
+    margin: auto;
+}
+
+.question {
+    display: none;
+}
+
+#progress-container {
+    display:none;
+}
+
+/* starting overlay */
+
 #starting-overlay {
-    align-items: center;
+    background-color: #313131;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; 
+    align-items: center;   
+    text-align: center;
+
+    width: 100%;
+    height: 100%;
 }
 
 #starting-overlay h1 {
     font-size: 48px;
+    margin: 0;
 }
 
 #starting-overlay h2 {
     font-size: 24px;
     font-weight: 300;
     opacity: 60%;
+}
+
+#jar-text {
+    position: absolute;
+    top:170px;
+    left: 680px;
+    font-family: "Covered By Your Grace";
+    font-weight: 200;
+}
+
+#carrot {
+    position: absolute;
+    top:230px;
+    left: 700px;
+}
+
+#scribble {
+    position: absolute;
+    top:240px;
+    left: 590px;
 }
 
 button{
@@ -29,6 +79,115 @@ button{
     font-weight: 300;
 }
 
-.question {
-    display: none;
+button:hover{
+    background-color: #b32222;
+    cursor: pointer;
+}
+
+
+/* questions */
+
+
+#Q1.question {
+    background-color: #313131;
+    box-sizing: border-box;
+    padding: 40px;
+    /* display: grid; */
+    grid-template-columns: 380px 1fr; /* Left side jar, right side text content */
+    gap: 40px;
+    align-items: center;
+    border-radius: 12px; /* Smooth card edges for the main wrapper */
+}
+
+/* Jar Section */
+#jar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+#jar img {
+    max-width: 100%;
+    max-height: 550px;
+    object-fit: contain;
+}
+
+/* Right Column Layout */
+.text {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    justify-content: center;
+    gap: 25px;
+}
+
+/* Top Scenario Card */
+.text > section:first-child {
+    background-color: #e0e0e0;
+    border-radius: 24px;
+    padding: 35px 40px;
+    color: #000000;
+}
+
+.text h1 {
+    font-family: "Courier New", Courier, monospace;
+    font-weight: bold;
+    font-size: 20px;
+    margin:0;
+}
+
+.text p {
+    font-size: 12px;
+    line-height: 1.5;
+    margin: 0;
+    white-space: pre-line; /* Respects line breaks in your text */
+}
+
+/* Bottom Options Container */
+.text > section:last-child {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); /* Three equal width columns */
+    gap: 15px;
+}
+
+/* Individual Choice Cards */
+.text > section:last-child section {
+    background-color: #e0e0e0;
+    border-radius: 30px;
+    padding: 25px 20px;
+    color: #000000;
+    display: flex;
+    flex-direction: column;
+    min-height: 180px; /* Ensures all cards stay perfectly uniform */
+}
+
+.text h3 {
+    font-size: 16px;
+    font-weight: bold;
+    margin: 0;
+}
+
+
+/* Progress Bar Layout */
+
+#progress-container {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 30px 40px 10px 40px; /* Adjust pads to line up perfectly with your contents below */
+    /* display: flex; */
+    gap: 16px; /* Spacing between each bar capsule */
+}
+
+.bar {
+    flex: 1; /* Forces all 8 bars to divide the 1200px width perfectly equally */
+    height: 12px; /* Thickness of the progress pill */
+    background-color: #555555; /* Default gray/inactive color from your screenshot */
+    border-radius: 999px; /* Smooth rounded capsule ends */
+    transition: background-color 0.3s ease; /* Smooth transition for when JS updates progress */
+}
+
+/* Filled/Active State */
+.bar.active {
+    background-color: #FFFFFF; /* White active state */
 }
