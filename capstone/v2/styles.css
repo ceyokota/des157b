@@ -1,0 +1,34 @@
+body {
+    background-color: #313131;
+    color: white;
+    font-family: "DM Sans", sans-serif;
+}
+
+#starting-overlay {
+    align-items: center;
+}
+
+#starting-overlay h1 {
+    font-size: 48px;
+}
+
+#starting-overlay h2 {
+    font-size: 24px;
+    font-weight: 300;
+    opacity: 60%;
+}
+
+button{
+    background-color: #EF4444;
+    color: white;
+    font-size: 24px;
+    border-radius: 999px;
+    border: none;
+    padding: 10px 24px 10px 24px;
+    font-family: "DM Sans", sans-serif;
+    font-weight: 300;
+}
+
+.question {
+    display: none;
+}
