@@ -1,31 +1,52 @@
 (function () {
     console.log("reading js");
+    "use strict";
 
-    // UI Element Selections
-    const beginButton = document.getElementById("begin-btn");
-    const startingOverlay = document.getElementById("starting-overlay");
+    // ==========================================================================
+    // UI ELEMENT SELECTIONS
+    // ==========================================================================
+    // Cache DOM references for the starting screen, progress bars, question cards,
+    // and main content area to avoid repeated querySelectorAll calls
+    const beginButton = document.querySelector("#begin-btn");
+    const startingOverlay = document.querySelector("#starting-overlay");
     const questionSection = document.querySelector(".question");
     const progressContainer = document.querySelector('#progress-container');
     const progressBars = document.querySelectorAll("#progress-container .bar");
-    const confirmBtn = document.getElementById('confirm-btn');
+    const confirmBtn = document.querySelector('#confirm-btn');
     const cards = document.querySelectorAll('.option-card');
     const optionsContainer = document.querySelector('.options-container');
-    const mainScenarioCard = document.getElementById('main-scenario-card');
+    const mainScenarioCard = document.querySelector('#main-scenario-card');
 
-    // Matter.js Module Destructuring
+    // ==========================================================================
+    // MATTER.JS PHYSICS ENGINE SETUP
+    // ==========================================================================
+    // Destructure the main Matter.js modules used for physics simulation
     const { Engine, Render, Runner, Bodies, Composite, Events, Body } = Matter;
     let engine, render, runner;
     let physicsInitialized = false;
 
+    // ==========================================================================
+    // JAR CONTAINER DIMENSIONS
+    // ==========================================================================
+    // These dimensions match the jar-layer-wrapper CSS size
     const width = 380;
     const height = 550;
 
-    // Game Progression States
+    // ==========================================================================
+    // GAME STATE TRACKING
+    // ==========================================================================
+    // Track whether the user is in prologue (intro text), question flow, or endgame
     let isPrologueMode = true; 
     let isEndGameMode = false;
     let currentQuestionIndex = 0;
     let selectedOptionIndex = null; 
 
+    // ==========================================================================
+    // PLAYER SCORE TRACKER
+    // ==========================================================================
+    // Tracks the cumulative score for each of the five priority categories.
+    // Each choice in a question adjusts one or more of these values.
+    // The final archetype is determined by the pattern of these scores.
     let scoreTracker = {
         career: 0,
         money: 0,
@@ -34,32 +55,234 @@
         freedom: 0
     };
 
-    // Horizontal target lanes for columns inside the 380px wide jar wrapper
-    // These X-coordinates match the center of the 380px jar wrapper 
-    // to create 5 distinct lanes for the orbs to stack into
+    // ==========================================================================
+    // ORBING LANE POSITIONING
+    // ==========================================================================
+    // Maps each category to its horizontal position within the jar.
+    // When orbs are sorted into columns, they move to these X-coordinates.
     const categoryXMap = {
-        career: 65,      // Lane 1
-        money: 125,      // Lane 2
-        health: 185,     // Lane 3
-        relationships: 245, // Lane 4
-        freedom: 305     // Lane 5
+        career: 65,      // Left column
+        money: 125,      // Center-left
+        health: 185,     // Center
+        relationships: 245, // Center-right
+        freedom: 305     // Right column
     };
 
     // ==========================================================================
     // THE 10-YEAR FUTURE ARCHETYPE PRESETS
     // ==========================================================================
     const futureRealitiesPreset = {
-        career: `Ten years later, the midnight oil you burned in the campus library has hardened into the foundation of a towering professional life. You sit in a pristine office overlooking a skyline that recognizes your name, holding the strategic influence you always craved. \n\nBut control comes with a quiet weight. Your calendar is an unyielding machine, and when your phone lights up late at night, it is always a crisis to manage, never a spontaneous invitation. You achieved the recognition you sacrificed sleep for.\n\nYou have built an impressive monument to your ambition, but sometimes, standing at the top, you wonder if you left the windows open too wide to catch a ghost of the warmth you left behind.`,
+        burnout: `Ten years later, your résumé is impressive in ways that would have once felt impossible. You became the person people rely on when things get difficult — the one who can handle pressure, stay late, and somehow keep producing even when everyone else is overwhelmed. You learned how to survive on momentum for so long that slowing down started to feel unnatural.
 
-        money: `Ten years down the road, financial anxiety is a distant memory. Your bank account is secure, your investments are structured, and rent is no longer a calculation that keeps you awake at 3 AM. You bought yourself the ultimate armor against uncertainty.\n\nYet, safety has its own invisible walls. In prioritizing survival and stability, you took fewer creative risks, turning down paths that were beautifully fragile but carried no guarantees. Your life is an efficiently engineered, predictable machine.\n\nYou stand on solid ground, heavily protected, but occasionally you look at the margins of your spreadsheet and realize you traded a few wild sparks for a very comfortable hearth.`,
+From the outside, your life looks successful. Stable income. Accomplishments. A version of the future you once desperately wanted. But there are moments, usually late at night or during rare quiet weekends, where you realize how much of your twenties were spent treating exhaustion like proof that you cared enough.
 
-        health: `Ten years later, your life moves with a deep, intentional cadence. You didn't burn out; you survived the great sorting of your twenties with your peace of mind and vitality intact. You wake up feeling grounded, having learned early that a broken vessel holds no water.\n\nThis boundaries-first lifestyle, however, required turning away from the high-velocity currents. You watched peers sprint past you into powerful positions or launch volatile, brilliant ventures while you chose to sleep, rest, and pull back.\n\nYour jar is clear, peaceful, and unbroken. You have preserved your well-being perfectly, navigating life at a pace that allows you to feel every step, even if the view is a quiet forest rather than a crowded summit.`,
+You still keep old photos on your phone from college. Sometimes you look at them and remember a version of yourself that had more energy for small things — wandering conversations, impulsive plans, being emotionally present without multitasking something else in the background.
 
-        relationships: `Ten years later, your life is crowded with laughter, shared tables, and deep roots. The bonfire traditions didn't end at graduation; they mutated into late-night living room deep-dives and friends who show up on your doorstep without asking. When crisis hits, you are surrounded by an unbreakable safety net of hands.\n\nTo keep these ties tight, you consistently stepped sideways from the career ladder. Professionally, your resume is modest, and your savings don't allow for luxury or effortless independence. You built a collective rather than an empire.\n\nYour wealth is entirely human, measured in the people who know your flaws and love you anyway—a beautifully messy, interconnected tapestry that leaves little room for solo flight.`,
+You got where you were trying to go.
 
-        freedom: `Ten years later, you are a ghost in the system, untethered and beautifully elusive. You kept your independence completely intact, rejecting standard paths, corporate standard ladders, and heavy emotional anchors. You live across time zones, packing your life into boxes at a moment's notice.\n\nBut total autonomy can feel surprisingly cold. Without permanent commitments, consistency can slip away; you are rich in horizons but light on roots. Maya and old college faces are distant social media updates now.\n\nYou have won the right to go anywhere, do anything, and answer to absolutely no one. You possess the open air, even if you sometimes wish there was a specific porch light waiting for you to land.`,
+The harder question became whether you ever learned how to arrive there without constantly feeling like you were falling behind.`,
 
-        balanced: `Ten years later, your life is an intricate dance of spinning plates. You didn't give yourself entirely to the office, nor did you vanish into isolation or let your friendships completely scatter. You live in a state of rolling compromise, constantly adjusting the weight.\n\nBecause you refused to choose an extreme, you didn't become a tycoon, a nomad, or a textbook saint. Your career is steady but not explosive; your friendships are close but require deliberate scheduling; your health is a work in progress.\n\nYour jar is a vibrant, kaleidoscopic mixture of shifting colors. It is not a perfect monument, but a deeply human framework—built completely out of conscious trade-offs.`
+        overwhelmed: `Ten years later, you don’t remember your final year of college as one coherent story. You remember fragments: unread notifications, unfinished plans, sitting in parked cars trying to mentally prepare yourself for the next thing. Back then, it felt like every area of life needed something from you at the same time.
+
+For a while after graduation, you kept operating in survival mode. You made decisions based on urgency more than certainty. Some things slipped away simply because you didn’t have the capacity to hold onto everything simultaneously.
+
+But over time, something changed. You became more honest about your limits. You stopped measuring your worth by how much stress you could absorb before collapsing. The life you eventually built wasn’t perfectly optimized, but it became sustainable in a way your college life never was.
+
+You still sometimes envy people who seemed more “put together” back then. But many of them were falling apart too — they were just better at hiding it.
+
+You learned that adulthood wasn’t about mastering chaos.
+
+It was about learning which responsibilities were actually yours to carry.`,
+
+        flourishing: `Ten years later, your life still feels recognizably yours.
+
+You worked hard, but not at the cost of every other part of yourself. You stayed ambitious while still making room for people, rest, and experiences that mattered outside of achievement. That balance wasn’t effortless — you had to protect it deliberately, especially in environments that rewarded overwork and constant optimization.
+
+There are still stressful weeks. There are still moments where everything feels uncertain again. But your life never became entirely consumed by one thing.
+
+You kept friendships alive after graduation. You learned how to leave work at work sometimes. You figured out that success becomes harder to enjoy when you abandon everything else that makes you feel human.
+
+A lot of people assumed balance meant a lack of ambition. What they didn’t understand was how difficult it actually is to maintain multiple parts of yourself at once.
+
+You’re proud of your career, but it isn’t the only thing people associate you with.
+
+Ten years later, the people closest to you still know who you are outside of what you produce.`,
+
+        unfinished: `Ten years later, your path makes more sense in hindsight than it ever did while you were living it.
+
+Back then, everyone around you seemed desperate to become a finalized version of themselves as quickly as possible. Careers, cities, relationships, routines — people acted like every decision needed to permanently define who they were going to be.
+
+You struggled with that.
+
+Part of you kept feeling like there had to be more time before everything became fixed.
+
+So your twenties became less linear than you expected. You changed directions more than once. Some opportunities arrived later than they did for other people. Some relationships drifted while you were still trying to understand yourself.
+
+But the uncertainty that once embarrassed you eventually became adaptability. You learned how to rebuild. How to pivot without seeing it as failure. How to let your identity evolve instead of forcing yourself into a life that stopped fitting.
+
+Even now, you’re still becoming someone.
+
+But ten years later, that no longer feels like evidence that you’re behind.`,
+
+        balancer: `Ten years later, your life is held together by consistency more than extremes.
+
+You were never the person who completely disappeared into work, but you also never fully abandoned your future for temporary comfort. You learned early that every part of life competes for your attention at the same time, and you spent years trying to make sure no single priority consumed everything else.
+
+Sometimes you wondered if being balanced meant you were less exceptional. Other people seemed more singularly driven, more willing to sacrifice everything for one goal. But over time, you noticed how many of them eventually had to rebuild neglected parts of their lives from scratch.
+
+You built slowly instead.
+
+Your relationships lasted because you stayed present. Your career grew because you stayed consistent. Your mental health remained manageable because you understood that burnout is harder to recover from than most people realize while it’s happening.
+
+Your life may not look dramatic from the outside.
+
+But ten years later, there’s something quietly powerful about waking up and recognizing the life around you as something you intentionally maintained.`,
+
+        climber: `Ten years later, you became the person who followed through.
+
+While other people hesitated, you kept moving. Applications turned into jobs. Jobs turned into promotions. You learned how to tolerate uncertainty long enough to build something stable out of it. A younger version of yourself would probably be amazed at how competent you eventually became.
+
+But ambition has a strange way of compressing time. Years passed faster than you expected because you were always focused on the next milestone instead of where you already were.
+
+There are friendships you still miss in quiet moments. People you assumed you would reconnect with once life “slowed down.” Some of them did. Some of them became memories tied to old apartments, campus walks, and versions of yourself you no longer fully know how to access.
+
+You don’t regret working hard. Most days, you’re proud of what you built.
+
+But ten years later, success feels less like reaching the top of something and more like learning whether the version of yourself that arrived there still has room for other people.`,
+
+        architect: `Ten years later, your life feels intentionally constructed.
+
+You spent your twenties making practical decisions other people sometimes dismissed as boring or overly cautious. You budgeted carefully. You thought long-term. You prioritized opportunities that created stability instead of chasing every temporary impulse.
+
+At times, it felt like you became an adult earlier than everyone else.
+
+But eventually, the payoff became visible. You built routines that protected your future instead of constantly threatening it. Financial emergencies became manageable instead of catastrophic. Your life gained structure.
+
+Still, there are moments where you wonder how many choices were genuinely yours versus choices made out of fear of instability. Sometimes you look at people who took bigger risks and feel a strange mix of admiration and confusion.
+
+You learned how to create security.
+
+The challenge, years later, became remembering that life is not only something to carefully maintain — it’s also something you’re allowed to fully participate in.`,
+
+        achiever: `Ten years later, people still describe you as someone who somehow “does it all.”
+
+You stayed ambitious without fully disappearing from the lives of the people you cared about. You answered calls during busy weeks. You kept showing up even when exhausted. You learned how to balance responsibility and emotional connection so consistently that most people never realized how overwhelmed you actually were.
+
+Your career progressed. Your relationships survived. From the outside, your life looked remarkably functional.
+
+But the cost of constantly maintaining everything at once was that you rarely felt fully rested anywhere.
+
+Even now, part of you struggles to stop performing competence long enough to admit when you’re tired. You became incredibly dependable, but sometimes at the expense of your own ability to slow down without guilt.
+
+Still, ten years later, there are people who trust you deeply because they remember that you kept showing up when it mattered.
+
+You spent your twenties proving you could carry multiple versions of your life simultaneously.
+
+Eventually, you had to learn that you deserved support too.`,
+
+        anchor: `Ten years later, people still think of you when they think about home.
+
+Not necessarily a physical place — more a feeling. During college, while everyone else was obsessing over résumés, applications, and future plans, you kept protecting the emotional parts of life that felt easy to neglect. You remembered birthdays. You answered difficult texts. You showed up for people even when it wasn’t convenient.
+
+Some opportunities passed you by because of that. There were moments where your life moved slower than other people’s. But many of the relationships you invested in lasted because they were built on genuine consistency instead of proximity.
+
+You learned that adulthood can become isolating very quickly if nobody actively fights against it.
+
+Ten years later, your life may not look the most impressive on paper, but it feels deeply inhabited. People trust you. Friends still call you during important moments. You became part of the emotional infrastructure of other people’s lives.
+
+And despite everything that changed after graduation, very few people who knew you back then ever doubted that you cared.`,
+
+        wanderer: `Ten years later, your twenties are difficult to summarize cleanly.
+
+You moved more than expected. Changed plans midway through them. Said yes to experiences that didn’t always make practical sense at the time. While other people rushed toward stability, you kept chasing moments that felt alive enough to remember later.
+
+Some people assumed you were directionless.
+
+But what they misunderstood was that you were trying to protect your ability to feel connected to your own life before responsibilities hardened everything into routine.
+
+There are still nights you think about old road trips, temporary apartments, conversations with people you’ll probably never see again. Those memories stayed vivid because you were fully present for them when they happened.
+
+Eventually, you did build stability — just not on the timeline everyone else expected.
+
+Ten years later, you’ve learned that freedom isn’t the absence of responsibility. It’s the ability to recognize when your life no longer feels like it belongs to you and having the courage to change direction before resentment settles in permanently.`,
+
+        survivor: `Ten years later, you are still grateful for the version of yourself that finally chose to rest.
+
+Back then, it felt like the world rewarded people for destroying themselves productively. Everyone around you seemed exhausted, anxious, constantly available, constantly optimizing. At some point, you realized you didn’t want your entire adulthood to feel like that.
+
+So you started protecting your peace earlier than most people do.
+
+You slept instead of overworking yourself into numbness. You stepped back when your body told you something was wrong. You learned that ambition becomes dangerous when it’s treated as more important than your ability to remain emotionally functional.
+
+There were moments where you worried you were falling behind. Sometimes you watched other people progress faster and questioned whether you were making excuses for yourself.
+
+But ten years later, many of those same people are only beginning to recover from patterns you interrupted years earlier.
+
+Your life is not perfect. But it feels sustainable.
+
+And after everything, sustainability became more valuable to you than speed.`,
+
+        ghost: `Ten years later, people from college still occasionally wonder what happened to you.
+
+Not because you vanished dramatically, but because you slowly became harder to reach. During your final years in school, life started feeling emotionally loud in a way you didn’t fully know how to explain. Expectations, obligations, conversations, constant accessibility — eventually you began pulling away simply to hear yourself think again.
+
+At first, the distance helped. You felt calmer. More protected. You built routines that belonged entirely to you.
+
+But isolation has a way of becoming comfortable.
+
+There are friendships you miss but no longer know how to restart. Messages you still think about replying to years later. Sometimes you wonder whether people interpreted your withdrawal as indifference when it was actually exhaustion.
+
+Still, ten years later, you know something important: disappearing was never really the goal.
+
+You were trying to preserve the parts of yourself that felt like they were dissolving under everyone else’s expectations.
+
+Eventually, healing meant learning how to reconnect without losing your sense of peace in the process.`,
+
+        detached: `Ten years later, independence still comes naturally to you.
+
+You learned early how to rely on yourself emotionally. During college, while everyone else seemed constantly entangled in expectations, plans, and group dynamics, you became skilled at keeping distance between yourself and anything that threatened your autonomy.
+
+Part of that was confidence.
+
+Part of it was self-protection.
+
+You built a life where nobody could fully control your time, identity, or direction. And in many ways, that freedom became one of the things you value most about adulthood.
+
+But emotional distance can quietly harden into habit. There are moments where you realize you became so focused on preserving your independence that vulnerability started feeling like weakness instead of connection.
+
+People often describe you as calm, capable, hard to read.
+
+The truth is more complicated.
+
+Ten years later, you still believe freedom matters deeply. You just understand now that real freedom also includes the ability to let people matter to you without immediately needing to retreat from them.`,
+
+        drifter: `Ten years later, your life doesn’t look the way you expected during graduation.
+
+Not because you failed, but because you resisted turning yourself into one fixed version of a person too early. You changed careers once, maybe twice. You moved cities unexpectedly. You left situations that looked stable from the outside because something about them quietly stopped feeling alive.
+
+For a long time, you worried that everyone else had some clearer sense of direction than you did.
+
+Eventually, you realized many people were just better at pretending certainty than actually feeling it.
+
+Your life became defined less by one long-term plan and more by your willingness to adapt when something no longer fit who you were becoming. That flexibility brought instability sometimes. It also brought experiences and perspectives you never would have found if you had forced yourself to stay still.
+
+Ten years later, you still don’t have every answer.
+
+But you’ve stopped viewing uncertainty as proof that your life is failing.
+
+To you, uncertainty became evidence that your life was still capable of changing.`,
+
+        provider: `Ten years later, you became someone other people could depend on financially, emotionally, or both.
+
+During college, while many people focused on freedom or self-discovery, you were already thinking about consequences. Rent. Savings. Family responsibilities. Stability. You learned how quickly financial stress can shape every other part of a person’s life.
+
+So you made practical choices.
+
+You worked longer hours. You prioritized consistency. Sometimes you sacrificed spontaneity because uncertainty simply felt too expensive to romanticize.
+
+Ten years later, your life has structure. You built something sustainable enough that other people can lean on you without everything collapsing underneath the weight.
+
+The challenge now is remembering that your value was never supposed to come solely from how much you can carry for everyone else.`
     };
 
     // ==========================================================================
@@ -237,17 +460,21 @@
     ];
 
     // --- COLOR ASSIGNMENT PALETTE ---
+    // Maps each category to its visual appearance (stroke and glow colors).
+    // Used when rendering orbs to match visual feedback with the category they represent.
     const colors = {
         career: { stroke: 'rgba(115, 158, 240, 1)', glow: 'rgba(115, 158, 240, 0.5)' },       
         money: { stroke: 'rgba(102, 210, 144, 1)', glow: 'rgba(102, 210, 144, 0.5)' },        
         health: { stroke: 'rgba(235, 110, 110, 1)', glow: 'rgba(235, 110, 110, 0.5)' },       
-        relationships: { stroke: 'rgba(238, 126, 177, 1)', glow: 'rgba(238, 126, 177, 0.5)' },
+        relationships: { stroke: 'rgb(238, 126, 225)', glow: 'rgba(238, 126, 177, 0.5)' },
         freedom: { stroke: 'rgba(243, 213, 110, 1)', glow: 'rgba(243, 213, 110, 0.5)' }       
     };
 
     // ==========================================================================
-    // INITIALIZATION & PHYSICS CORE
+    // USER INTERACTION: BEGIN BUTTON
     // ==========================================================================
+    // When the user clicks "Begin Experience", hide the intro screen, show the
+    // first question, and initialize the physics engine for orb simulation.
     beginButton.addEventListener("click", function () {
         startingOverlay.style.display = "none";
         
@@ -264,12 +491,17 @@
         renderPrologueScreen();
     });
 
+    // ==========================================================================
+    // PHYSICS ENGINE INITIALIZATION
+    // ==========================================================================
+    // Sets up Matter.js engine, creates the jar collision boundaries, and
+    // attaches custom rendering logic for orb glows. Called once on "Begin".
     function initJarPhysics() {
         engine = Engine.create();
         engine.gravity.y = 0.16; 
 
         render = Render.create({
-            element: document.getElementById('matter-jar-container'),
+            element: document.querySelector('#matter-jar-container'),
             engine: engine,
             options: {
                 width: width,
@@ -329,8 +561,11 @@
     }
 
     // ==========================================================================
-    // SCREEN STATE INJECTORS
+    // SCREEN STATE RENDERING
     // ==========================================================================
+    // Functions that update the main card content based on the current game state.
+
+    // Displays the prologue/intro screen with the framing narrative.
     function renderPrologueScreen() {
         isPrologueMode = true;
         isEndGameMode = false;
@@ -353,8 +588,9 @@ There are no perfect choices. Only trade-offs.
     }
 
     function renderCurrentQuestion() {
-        // --- ADD THIS BLOCK HERE ---
-        // This ensures the 9th bar (index 8) activates when we move to the final index
+        // Displays the current question prompt and three option choices.
+        // Handles progress bar updates and button state management.
+        // Transitions to endgame when all questions are exhausted.
         if (currentQuestionIndex === 8) { 
             if(progressBars[8]) progressBars[8].classList.add("active");
         }
@@ -394,6 +630,13 @@ There are no perfect choices. Only trade-offs.
         });
     }
 
+    // ==========================================================================
+    // USER INTERACTION: CARD SELECTION & CONFIRM FLOW
+    // ==========================================================================
+    // Handles all user interactions during the question phase:
+    // - Selecting an option card highlights it and enables the confirm button
+    // - Confirming spawns orbs based on the selected option's score outputs
+    // - Progresses to the next question or triggers endgame
     function setupInteractionFlow() {
         cards.forEach((card, index) => {
             card.addEventListener('click', function() {
@@ -446,6 +689,12 @@ There are no perfect choices. Only trade-offs.
         });
     }
 
+    // ==========================================================================
+    // ORB SPAWNING
+    // ==========================================================================
+    // Creates a new physics body (orb) representing a player choice impact.
+    // isDark indicates whether the choice was negative (dark) or positive (light).
+    // The orb will fall into the jar and later be sorted into its category column.
     function spawnBall(qualityName, isDark) {
         const jarCenterX = width / 2;
         const jarHeight = 530;
@@ -476,8 +725,12 @@ There are no perfect choices. Only trade-offs.
     }
 
     // ==========================================================================
-    // COMPUTE HIGHEST SCORE MATRIX REALITY (COMBINED SINGLE-FRAME READOUT)
+    // ENDGAME SEQUENCE
     // ==========================================================================
+    // Triggered when all 8 questions are answered.
+    // Disables gravity, initiates the sorting pipeline to organize orbs into
+    // columns by category, then triggers annihilation (opposite pairs cancel).
+    // Finally displays the final archetype story.
     function showEndGame() {
         isEndGameMode = true;
         
@@ -493,136 +746,319 @@ There are no perfect choices. Only trade-offs.
         const allBodies = Composite.allBodies(engine.world).filter(b => b.gameProperties);
         allBodies.forEach(ball => {
             ball.gameProperties.phase = "sorting";
-            ball.collisionFilter.mask = 0; 
+            ball.collisionFilter.mask = 0;
+            Body.setVelocity(ball, { x: 0, y: 0 });
+            Body.setAngularVelocity(ball, 0);
+            Body.setStatic(ball, false);
         });
 
-        Events.on(engine, 'beforeUpdate', runInJarColumnSortPipeline);
-    }
-
-    function runInJarColumnSortPipeline() {
-        const gameBalls = Composite.allBodies(engine.world).filter(b => b.gameProperties);
-        let columnStackCounts = { career: 0, money: 0, health: 0, relationships: 0, freedom: 0 };
-        
-
-        gameBalls.forEach(ball => {
-            const props = ball.gameProperties;
-
-            if (props.phase === "sorting") {
-                const cat = props.quality;
-                const targetX = categoryXMap[cat];
-                
-                const verticalRowIndex = columnStackCounts[cat];
-                const targetY = 510 - (verticalRowIndex * (ball.circleRadius * 2 + 5));
-                columnStackCounts[cat]++;
-
-                const deltaX = targetX - ball.position.x;
-                const deltaY = targetY - ball.position.y;
-
-                Body.setVelocity(ball, {
-                    x: deltaX * 0.10,
-                    y: deltaY * 0.10
-                });
-
-                if (Math.abs(deltaX) < 1 && Math.abs(deltaY) < 1) {
-                    Body.setPosition(ball, { x: targetX, y: targetY });
-                    Body.setVelocity(ball, { x: 0, y: 0 });
-                    props.phase = "aligned";
-                }
-            }
-        });
-
-        const sortingCount = gameBalls.filter(b => b.gameProperties.phase === "sorting").length;
-        if (sortingCount === 0 && gameBalls.length > 0) {
+        runInJarColumnSortPipeline(() => {
             // TRIGGER: This makes the labels appear under the columns
-            document.getElementById("chart-labels").classList.remove("hidden");
+            document.querySelector("#chart-labels").classList.remove("hidden");
             
             setTimeout(executeSlowInJarAnnihilationSequence, 800);
-        }
+        });
     }
 
+    // Sorts all orbs into their category columns without overlapping.
+    // Animates each orb to its lane's X-position and stacks them vertically.
+    // Calls doneCallback when animation completes.
+    function runInJarColumnSortPipeline(doneCallback) {
+        const gameBalls = Composite.allBodies(engine.world).filter(b => b.gameProperties);
+        const categories = ['career', 'money', 'health', 'relationships', 'freedom'];
+        const ballsToAnimate = [];
+        
+        categories.forEach(cat => {
+            const catBalls = gameBalls
+                .filter(ball => ball.gameProperties.phase === "sorting" && ball.gameProperties.quality === cat)
+                .sort((a, b) => b.position.y - a.position.y);
+
+            catBalls.forEach((ball, index) => {
+                const targetX = categoryXMap[cat];
+                const targetY = 510 - (index * (ball.circleRadius * 2 + 5));
+                ballsToAnimate.push({ ball, targetX, targetY });
+            });
+        });
+
+        animateBallsToTargets(ballsToAnimate, () => {
+            if (doneCallback) doneCallback();
+        });
+    }
+
+    // Pairs opposing orbs (light vs dark) within each category and shrinks them
+    // simultaneously over 800ms until they disappear. This represents how
+    // conflicting priorities or trade-offs cancel each other out.
+    // After all pairs are removed, realigns remaining orbs and shows the ending.
     function executeSlowInJarAnnihilationSequence() {
         const gameBalls = Composite.allBodies(engine.world).filter(b => b.gameProperties);
         const categories = ['career', 'money', 'health', 'relationships', 'freedom'];
-        
-        let foundPairToAnnihilate = false;
+        const pairsToDestroy = [];
 
-        for (let cat of categories) {
-            let catBalls = gameBalls.filter(b => b.gameProperties.quality === cat && b.gameProperties.phase !== "destroyed");
-            let lightOrb = catBalls.find(b => !b.gameProperties.isDark);
-            let darkOrb = catBalls.find(b => b.gameProperties.isDark);
+        categories.forEach(cat => {
+            const catBalls = gameBalls.filter(b => b.gameProperties.quality === cat && b.gameProperties.phase !== "destroyed");
+            const lightOrbs = catBalls.filter(b => !b.gameProperties.isDark);
+            const darkOrbs = catBalls.filter(b => b.gameProperties.isDark);
+            const pairCount = Math.min(lightOrbs.length, darkOrbs.length);
 
-            if (lightOrb && darkOrb) {
-                foundPairToAnnihilate = true;
-                
-                lightOrb.gameProperties.phase = "destroyed";
-                darkOrb.gameProperties.phase = "destroyed";
-
-                mainScenarioCard.querySelector("p").innerText = `Opposing actions collide... Faded choices and trade-offs neutralize each other inside your glass space.`;
-
-                let shrinkInterval = setInterval(() => {
-                    if (lightOrb.circleRadius > 3 && darkOrb.circleRadius > 3) {
-                        Body.scale(lightOrb, 0.82, 0.82);
-                        Body.scale(darkOrb, 0.82, 0.82);
-                    } else {
-                        clearInterval(shrinkInterval);
-                        Composite.remove(engine.world, lightOrb);
-                        Composite.remove(engine.world, darkOrb);
-                        
-                        setTimeout(() => {
-                            realignInJarColumnHeights();
-                            executeSlowInJarAnnihilationSequence();
-                        }, 500);
-                    }
-                }, 50);
-
-                break; 
+            for (let i = 0; i < pairCount; i++) {
+                pairsToDestroy.push({ light: lightOrbs[i], dark: darkOrbs[i] });
             }
+        });
+
+        if (pairsToDestroy.length > 0) {
+            pairsToDestroy.forEach(pair => {
+                pair.light.gameProperties.phase = "destroyed";
+                pair.dark.gameProperties.phase = "destroyed";
+            });
+
+            mainScenarioCard.querySelector("p").innerText = `Opposing actions collide... Faded choices and trade-offs neutralize each other inside your glass space.`;
+
+            const duration = 800;
+            const startTime = Date.now();
+            const shrinkData = pairsToDestroy.map(pair => ({
+                light: pair.light,
+                dark: pair.dark,
+                startLight: pair.light.circleRadius,
+                startDark: pair.dark.circleRadius
+            }));
+            const ease = t => t * t * (3 - 2 * t);
+
+            const shrinkInterval = setInterval(() => {
+                const elapsed = Math.min(Date.now() - startTime, duration);
+                const progress = ease(elapsed / duration);
+                const targetRatio = 1 - progress;
+                let activeShrinks = 0;
+
+                shrinkData.forEach(data => {
+                    if (data.light) {
+                        const nextRadius = Math.max(0.1, data.startLight * targetRatio);
+                        const scale = nextRadius / data.light.circleRadius;
+                        Body.scale(data.light, scale, scale);
+                        if (elapsed < duration) activeShrinks++;
+                    }
+                    if (data.dark) {
+                        const nextRadius = Math.max(0.1, data.startDark * targetRatio);
+                        const scale = nextRadius / data.dark.circleRadius;
+                        Body.scale(data.dark, scale, scale);
+                        if (elapsed < duration) activeShrinks++;
+                    }
+                });
+
+                if (elapsed >= duration) {
+                    clearInterval(shrinkInterval);
+                    pairsToDestroy.forEach(pair => {
+                        if (pair.light) Composite.remove(engine.world, pair.light);
+                        if (pair.dark) Composite.remove(engine.world, pair.dark);
+                    });
+
+                    realignInJarColumnHeights(() => {
+                        mainScenarioCard.classList.add("end-game-mode");
+                        mainScenarioCard.querySelector("h1").innerText = "Experience Complete";
+                        printUnifiedFinalMetricsDashboard();
+                        confirmBtn.disabled = false;
+                    });
+                }
+            }, 16);
+
+            return;
         }
 
         // FIXED: Combined layout screen print builds metrics list AND archetype summary simultaneously inside the expanded box frame
-        if (!foundPairToAnnihilate) {
-            // NOW apply the formatting and text, so it never flashes a transition card
+        realignInJarColumnHeights(() => {
             mainScenarioCard.classList.add("end-game-mode");
-            mainScenarioCard.querySelector("h1").innerText = "Ten Years Later";
+            mainScenarioCard.querySelector("h1").innerText = "Experience Complete";
             printUnifiedFinalMetricsDashboard();
             confirmBtn.disabled = false;
-        }
+        });
     }
 
-    function realignInJarColumnHeights() {
+    // After annihilation removes pairs, re-stacks remaining orbs in their columns
+    // to eliminate gaps and create a clean final visual. Called before displaying
+    // the archetype story and final metrics.
+    function realignInJarColumnHeights(doneCallback) {
         const categories = ['career', 'money', 'health', 'relationships', 'freedom'];
         const gameBalls = Composite.allBodies(engine.world).filter(b => b.gameProperties);
+        const ballsToAnimate = [];
 
         categories.forEach(cat => {
             let columnStackIndex = 0;
             let catBalls = gameBalls.filter(b => b.gameProperties.quality === cat).sort((a,b) => b.position.y - a.position.y);
             
             catBalls.forEach(ball => {
+                const targetX = categoryXMap[cat];
                 const targetY = 510 - (columnStackIndex * (ball.circleRadius * 2 + 5));
-                Body.setPosition(ball, { x: categoryXMap[cat], y: targetY });
+                ballsToAnimate.push({ ball, targetX, targetY });
                 columnStackIndex++;
             });
         });
+
+        animateBallsToTargets(ballsToAnimate, doneCallback);
     }
 
-    function printUnifiedFinalMetricsDashboard() {
-        // 1. Calculate archetype path key
-        let highestScore = -Infinity;
-        let dominantArchetype = "balanced";
-
-        Object.keys(scoreTracker).forEach(trait => {
-            if (scoreTracker[trait] > highestScore) {
-                highestScore = scoreTracker[trait];
-                dominantArchetype = trait;
-            }
-        });
-
-        // If no score is significantly higher, default to balanced
-        if (highestScore <= 1) {
-            dominantArchetype = "balanced";
+    // ==========================================================================
+    // ANIMATION HELPER
+    // ==========================================================================
+    // Smoothly animates a batch of orbs from their current positions to target
+    // coordinates over 800ms using ease-in-out easing. Used for sorting,
+    // realigning, and repositioning phases. Executes doneCallback when complete.
+    function animateBallsToTargets(ballsToAnimate, doneCallback) {
+        if (ballsToAnimate.length === 0) {
+            if (doneCallback) doneCallback();
+            return;
         }
 
-        const selectedStoryOutput = futureRealitiesPreset[dominantArchetype];
+        const duration = 800;
+        const startTime = Date.now();
+
+        ballsToAnimate.forEach(({ ball }) => {
+            Body.setStatic(ball, false);
+            Body.setVelocity(ball, { x: 0, y: 0 });
+            Body.setAngularVelocity(ball, 0);
+            ball._animateStart = { x: ball.position.x, y: ball.position.y };
+        });
+
+        const ease = t => t * t * (3 - 2 * t);
+
+        const animationInterval = setInterval(() => {
+            const elapsed = Math.min(Date.now() - startTime, duration);
+            const progress = ease(elapsed / duration);
+            let anyMoving = false;
+
+            ballsToAnimate.forEach(({ ball, targetX, targetY }) => {
+                if (!ball || !ball.position || !ball._animateStart) return;
+
+                const startX = ball._animateStart.x;
+                const startY = ball._animateStart.y;
+                const nextX = startX + (targetX - startX) * progress;
+                const nextY = startY + (targetY - startY) * progress;
+
+                Body.setPosition(ball, { x: nextX, y: nextY });
+
+                if (elapsed < duration) {
+                    anyMoving = true;
+                }
+            });
+
+            if (!anyMoving) {
+                clearInterval(animationInterval);
+                ballsToAnimate.forEach(({ ball, targetX, targetY }) => {
+                    if (!ball || !ball.position) return;
+                    Body.setPosition(ball, { x: targetX, y: targetY });
+                    Body.setVelocity(ball, { x: 0, y: 0 });
+                    Body.setAngularVelocity(ball, 0);
+                    Body.setStatic(ball, true);
+                    delete ball._animateStart;
+                });
+                if (doneCallback) doneCallback();
+            }
+        }, 16);
+    }
+
+    // ==========================================================================
+    // ARCHETYPE SELECTION LOGIC
+    // ==========================================================================
+    // Determines the player's final archetype based on their scoreTracker values.
+    // Uses a multi-step decision tree:
+    // 1. Override states (extreme score combinations)
+    // 2. Tie-breaking rules (for tied highest scores)
+    // 3. Single dominant stat logic
+    // 4. Fallback to "unfinished"
+    function getFinalArchetype() {
+        const stats = ['career', 'money', 'health', 'relationships', 'freedom'];
+        const s = scoreTracker;
+
+        // Step 1 — Override states
+        if (s.health <= -6 && s.career >= 5) return 'burnout';
+        if (stats.filter(key => s[key] <= -5).length >= 3) return 'overwhelmed';
+        if (stats.every(key => s[key] > 0)) return 'flourishing';
+        if (stats.every(key => s[key] >= -3 && s[key] <= 3)) return 'unfinished';
+        if (stats.filter(key => s[key] >= 3).length >= 3 && !stats.some(key => s[key] <= -2)) return 'balancer';
+
+        const highestValue = Math.max(...stats.map(key => s[key]));
+        const topStats = stats.filter(key => s[key] === highestValue);
+
+        // Step 2 — Tie archetypes
+        if (topStats.length >= 2) {
+            const has = key => topStats.includes(key);
+
+            if (topStats.length === 2) {
+                if (has('career') && has('money')) return 'architect';
+                if (has('career') && has('relationships')) return s.health <= -2 ? 'achiever' : 'balancer';
+                if (has('career') && has('health')) return 'balancer';
+                if (has('career') && has('freedom')) return 'drifter';
+                if (has('relationships') && has('freedom')) return 'wanderer';
+                if (has('relationships') && has('health')) return 'anchor';
+                if (has('health') && has('freedom')) return 'survivor';
+                if (has('money') && has('freedom')) return 'provider';
+            }
+
+            if (topStats.length === 3) {
+                const hasAll = (...keys) => keys.every(key => has(key));
+                if (hasAll('career', 'money', 'health')) return s.freedom <= -3 ? 'architect' : 'balancer';
+                if (hasAll('career', 'relationships', 'health')) return s.health <= -2 ? 'achiever' : 'balancer';
+            }
+
+            return 'balancer';
+        }
+
+        // Step 3 — Single dominant stat
+        const dominant = topStats[0];
+
+        switch (dominant) {
+            case 'career':
+                if (s.relationships <= -4) return 'climber';
+                if (s.money >= 4 && s.freedom <= -3) return 'architect';
+                if (s.relationships >= 4 && s.health <= -2) return 'achiever';
+                return 'climber';
+            case 'relationships':
+                if (s.career <= -4) return 'anchor';
+                if (s.freedom >= 4 && s.money <= -2) return 'wanderer';
+                return 'anchor';
+            case 'health':
+                if (s.relationships <= -4) return 'ghost';
+                return 'survivor';
+            case 'freedom':
+                if (s.relationships <= -3) return 'detached';
+                if (s.career <= -3 && s.money <= -3) return 'wanderer';
+                return 'drifter';
+            case 'money':
+                if (s.freedom <= -3) return 'provider';
+                return 'architect';
+            default:
+                return 'unfinished';
+        }
+    }
+
+    // Archetype display name map
+    const archetypeLabelMap = {
+        // Maps archetype keys to their display titles shown in the final story heading
+        burnout: 'The Burnout',
+        overwhelmed: 'The Overwhelmed',
+        flourishing: 'The Flourishing',
+        unfinished: 'The Unfinished',
+        balancer: 'The Balancer',
+        climber: 'The Climber',
+        architect: 'The Architect',
+        achiever: 'The Achiever',
+        anchor: 'The Anchor',
+        wanderer: 'The Wanderer',
+        survivor: 'The Survivor',
+        ghost: 'The Ghost',
+        detached: 'The Detached',
+        drifter: 'The Drifter',
+        provider: 'The Provider'
+    };
+
+    // ==========================================================================
+    // FINAL RESULTS DISPLAY
+    // ==========================================================================
+    // Calculates the final archetype, retrieves its corresponding story text,
+    // and displays the player's score metrics alongside their personalized
+    // "Ten Years Later" narrative. Reveals the main card with end-game styling.
+    function printUnifiedFinalMetricsDashboard() {
+        const dominantArchetype = getFinalArchetype();
+        const selectedStoryOutput = futureRealitiesPreset[dominantArchetype] || futureRealitiesPreset.unfinished;
+        const archetypeTitle = archetypeLabelMap[dominantArchetype] || 'Future Archetype';
 
         // 2. Prepare the combined string
         const dashboardHTMLString = `
@@ -632,10 +1068,8 @@ There are no perfect choices. Only trade-offs.
             ❤️ Personal Well-being Score: <strong>${scoreTracker.health}</strong><br>
             🌸 Human Connection Score: <strong>${scoreTracker.relationships}</strong><br>
             💛 Total Autonomy Score: <strong>${scoreTracker.freedom}</strong>
-            
             <hr>
-            
-            <strong>Ten Years Later</strong><br><br>
+            <strong>${archetypeTitle}</strong><br>
             ${selectedStoryOutput}
         `;
 

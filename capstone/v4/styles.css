@@ -38,6 +38,11 @@
     height: 100%;
 }
 
+#title-with-decorations {
+    position: relative;
+    display: inline-block;
+}
+
 #starting-overlay h1 {
     font-size: 48px;
     margin: 0;
@@ -51,22 +56,24 @@
 
 #jar-text {
     position: absolute;
-    top: 170px;
-    left: 680px;
+    top: -1.9em;
+    left: 43%;
     font-family: "Covered By Your Grace";
     font-weight: 200;
+    white-space: nowrap;
+    margin: 0;
 }
 
 #carrot {
     position: absolute;
-    top: 230px;
-    left: 700px;
+    top: -1.5em;
+    left: 46%;
 }
 
 #scribble {
     position: absolute;
-    top: 240px;
-    left: 590px;
+    top: -0.3em;
+    left: 18%;
 }
 
 #starting-overlay button {
