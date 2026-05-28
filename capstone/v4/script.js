@@ -284,11 +284,11 @@
         Runner.run(runner, engine);
 
         const jarMaterial = { isStatic: true, render: { visible: false } };
-        const wallThickness = 10;
+        const wallThickness = 8;
         const jarCenterX = width / 2;
-        const jarCenterY = height / 2;
+        const jarCenterY = height / 2 - 10;
         const jarWidth = 340;
-        const jarHeight = 530;
+        const jarHeight = 560;
 
         const jarBottom = Bodies.rectangle(jarCenterX, jarCenterY + jarHeight/2 - 10, jarWidth - 40, wallThickness, { ...jarMaterial, chamfer: { radius: 15 } });
         const jarLeft = Bodies.rectangle(jarCenterX - jarWidth/2, jarCenterY, wallThickness, jarHeight - 80, jarMaterial);
@@ -398,66 +398,53 @@ There are no perfect choices. Only trade-offs.
         cards.forEach((card, index) => {
             card.addEventListener('click', function() {
                 if (isPrologueMode || isEndGameMode) return; 
+                
+                // Remove selection from all, add to this one
                 cards.forEach(c => c.classList.remove('selected'));
                 this.classList.add('selected');
                 
                 selectedOptionIndex = index;
-                confirmBtn.disabled = false;
+                
+                // IMPORTANT: This enables the button as soon as they pick an option
+                confirmBtn.disabled = false; 
             });
         });
 
         confirmBtn.addEventListener('click', function() {
-            // 1. Prevent action if already locked
-            if (confirmBtn.disabled) return; 
-
+            // PROLOGUE FLOW
             if (isPrologueMode) {
                 renderCurrentQuestion();
                 return;
             }
 
+            // SELECTION FLOW
             if (selectedOptionIndex === null) return;
 
-            // 2. DISABLE BUTTON IMMEDIATELY
+            // 1. DISABLE BUTTON IMMEDIATELY to prevent double-clicks
             confirmBtn.disabled = true;
-            confirmBtn.style.opacity = "0.5"; 
-            confirmBtn.style.cursor = "not-allowed";
 
             const currentData = questionsData[currentQuestionIndex];
             const chosenOption = currentData.options[selectedOptionIndex];
 
+            // 2. Score and spawn orbs
             chosenOption.outputs.forEach(output => {
-                if (scoreTracker[output.quality] !== undefined) {
-                    scoreTracker[output.quality] += output.value;
+                scoreTracker[output.quality] += output.value;
+                for (let i = 0; i < Math.abs(output.value); i++) {
+                    spawnBall(output.quality, output.value < 0);
                 }
-
-                const count = Math.abs(output.value);
-                const isDark = output.value < 0; 
-
-                let dropped = 0;
-                const timer = setInterval(() => {
-                    if (dropped >= count) return clearInterval(timer);
-                    spawnBall(output.quality, isDark);
-                    dropped++;
-                }, 140);
             });
 
-            updateProgressBar();
             currentQuestionIndex++;
             
-            // 3. The button stays disabled during this 600ms transition 
+            // 3. Move to next state
             setTimeout(() => {
                 renderCurrentQuestion();
+                // We keep it disabled until the next card is selected 
+                // (The selection logic above will re-enable it)
+                confirmBtn.disabled = true; 
             }, 600);
-        }); // <-- This closes the event listener
-
-        function updateProgressBar() {
-            progressBars.forEach((bar, idx) => {
-                if (idx < currentQuestionIndex) {
-                    bar.classList.add("active");
-                }
-            });
-        }
-    } 
+        });
+    }
 
     function spawnBall(qualityName, isDark) {
         const jarCenterX = width / 2;
