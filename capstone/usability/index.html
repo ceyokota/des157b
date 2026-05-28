@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Version 3</title>
+    <title>Version 4</title>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,11 +18,13 @@
 
     <section id="container">
         <section id="starting-overlay">
-            <h1>My plate is too full!</h1>
+            <div id="title-with-decorations">
+                <h1>My plate is too full!</h1>
+                <h1 id="jar-text">jar</h1>
+                <img src="images/carrot.png" id="carrot" alt="">
+                <img src="images/scribble.png" id="scribble" alt="">
+            </div>
             <h2>what do you choose to prioritize?</h2>
-            <h1 id="jar-text">jar</h1>
-            <img src="images/carrot.png" id="carrot" alt="">
-            <img src="images/scribble.png" id="scribble" alt="">
             <button id="begin-btn">begin experience</button>
         </section>
 
@@ -35,13 +37,18 @@
             <div class="bar"></div>
             <div class="bar"></div>
             <div class="bar"></div>
+            <div class="bar"></div> 
         </section>
     
         <section id="Q1" class="question hidden">
             <section id="jar">
                 <div id="jar-layer-wrapper">
                     <div id="matter-jar-container"></div>
-                    <img src="images/jar.png" id="jar-overlay-img" alt="Jar Rim Wrapper Frame">
+                    <img src="images/jar.png" id="jar-overlay-img" alt="Jar">
+                    
+                    <div id="chart-labels" class="hidden">
+                        <span>Career</span><span>Money</span><span>Health</span><span>Relat.</span><span>Freedom</span>
+                    </div>
                 </div>
             </section>
             
@@ -68,7 +75,7 @@
                     </section>
 
                     <div class="confirm-container">
-                        <button id="confirm-btn">Begin Experience</button>
+                        <button id="confirm-btn">Confirm</button>
                     </div>
                 </section>
             </section>
