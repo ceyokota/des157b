@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Version 1 - Interactive Jar Experience</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Covered+By+Your+Grace&family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Intel+One+Mono:ital,wght@0,300..700;1,300..700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+    <section id="container">
+        <section id="starting-overlay">
+            <h1>My plate is too full!</h1>
+            <h2>what do you choose to prioritize?</h2>
+            <h1 id="jar-text">jar</h1>
+            <img src="images/carrot.png" id="carrot" alt="">
+            <img src="images/scribble.png" id="scribble" alt="">
+            <button id="begin-btn">begin experience</button>
+        </section>
+
+        <section id="progress-container" class="hidden">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div> 
+        </section>
+    
+        <section id="Q1" class="question hidden">
+            <section id="jar">
+                <div id="jar-layer-wrapper">
+                    <div id="matter-jar-container"></div>
+                    <img src="images/jar.png" id="jar-overlay-img" alt="Jar">
+                    
+                    <div id="chart-labels" class="hidden">
+                        <span>Career</span><span>Money</span><span>Health</span><span>Relat.</span><span>Freedom</span>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="text">
+                <section id="main-scenario-card">
+                    <h1></h1>
+                    <p></p>
+                </section>
+                
+                <section class="interactive-flow-wrapper">
+                    <section class="options-container hidden">
+                        <section class="option-card" id="opt-left">
+                            <h3></h3>
+                            <p></p>
+                        </section>
+                        <section class="option-card" id="opt-mid">
+                            <h3></h3>
+                            <p></p>
+                        </section>
+                        <section class="option-card" id="opt-right">
+                            <h3></h3>
+                            <p></p>
+                        </section>
+                    </section>
+
+                    <div class="confirm-container">
+                        <button id="confirm-btn">Confirm</button>
+                    </div>
+                </section>
+            </section>
+        </section>
+    </section>
+
+</body>
+</html>
