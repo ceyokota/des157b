@@ -21,32 +21,23 @@
     // MATTER.JS PHYSICS ENGINE SETUP
     // ==========================================================================
     // Destructure the main Matter.js modules used for physics simulation
+    
     const { Engine, Render, Runner, Bodies, Composite, Events, Body } = Matter;
     let engine, render, runner;
-    let physicsInitialized = false;
-
-    // ==========================================================================
-    // JAR CONTAINER DIMENSIONS
-    // ==========================================================================
-    // These dimensions match the jar-layer-wrapper CSS size
-    const width = 380;
-    const height = 550;
 
     // ==========================================================================
     // GAME STATE TRACKING
     // ==========================================================================
-    // Track whether the user is in prologue (intro text), question flow, or endgame
-    let isPrologueMode = true; 
-    let isEndGameMode = false;
-    let currentQuestionIndex = 0;
-    let selectedOptionIndex = null; 
+
+    let isPrologueMode = true; //indicate that we're currently in the opening screen (the title screen)
+    let isEndGameMode = false; //we are not in the end screen yet
+    let currentQuestionIndex = 0; //keeping track of the question we're on
+    let selectedOptionIndex = null; //sets up a variable for it to keep track of selected option, but starts as null because we haven't selected anything yet
 
     // ==========================================================================
     // PLAYER SCORE TRACKER
     // ==========================================================================
-    // Tracks the cumulative score for each of the five priority categories.
-    // Each choice in a question adjusts one or more of these values.
-    // The final archetype is determined by the pattern of these scores.
+    // Score metrics, starting on 0 for everything in the beginning
     let scoreTracker = {
         career: 0,
         money: 0,
@@ -56,10 +47,14 @@
     };
 
     // ==========================================================================
-    // ORBING LANE POSITIONING
+    // ORBS AND JAR SETUP
     // ==========================================================================
-    // Maps each category to its horizontal position within the jar.
-    // When orbs are sorted into columns, they move to these X-coordinates.
+
+    // Jar container dimensions so the orbs know their boundaries
+    const width = 380;
+    const height = 550;
+
+    // When orbs are sorted into columns towrads the end, they move to these X-coordinates.
     const categoryXMap = {
         career: 65,      // Left column
         money: 125,      // Center-left
@@ -71,6 +66,7 @@
     // ==========================================================================
     // THE 10-YEAR FUTURE ARCHETYPE PRESETS
     // ==========================================================================
+    //setting up the endings
     const futureRealitiesPreset = {
         burnout: `Ten years later, your résumé is impressive in ways that would have once felt impossible. You became the person people rely on when things get difficult — the one who can handle pressure, stay late, and somehow keep producing even when everyone else is overwhelmed. You learned how to survive on momentum for so long that slowing down started to feel unnatural.
 
@@ -460,14 +456,27 @@ The challenge now is remembering that your value was never supposed to come sole
     ];
 
     // --- COLOR ASSIGNMENT PALETTE ---
-    // Maps each category to its visual appearance (stroke and glow colors).
-    // Used when rendering orbs to match visual feedback with the category they represent.
     const colors = {
-        career: { stroke: 'rgba(115, 158, 240, 1)', glow: 'rgba(115, 158, 240, 0.5)' },       
-        money: { stroke: 'rgba(102, 210, 144, 1)', glow: 'rgba(102, 210, 144, 0.5)' },        
-        health: { stroke: 'rgba(235, 110, 110, 1)', glow: 'rgba(235, 110, 110, 0.5)' },       
-        relationships: { stroke: 'rgb(238, 126, 225)', glow: 'rgba(238, 126, 177, 0.5)' },
-        freedom: { stroke: 'rgba(243, 213, 110, 1)', glow: 'rgba(243, 213, 110, 0.5)' }       
+        career: { 
+            stroke: 'rgba(115, 158, 240, 1)', 
+            glow: 'rgba(115, 158, 240, 0.5)' 
+        },       
+        money: { 
+            stroke: 'rgba(102, 210, 144, 1)', 
+            glow: 'rgba(102, 210, 144, 0.5)' 
+        },        
+        health: { 
+            stroke: 'rgba(235, 110, 110, 1)', 
+            glow: 'rgba(235, 110, 110, 0.5)' 
+        },       
+        relationships: { 
+            stroke: 'rgb(238, 126, 225)', 
+            glow: 'rgba(238, 126, 177, 0.5)' 
+        },
+        freedom: { 
+            stroke: 'rgba(243, 213, 110, 1)', 
+            glow: 'rgba(243, 213, 110, 0.5)' 
+        }       
     };
 
     // ==========================================================================
@@ -476,19 +485,16 @@ The challenge now is remembering that your value was never supposed to come sole
     // When the user clicks "Begin Experience", hide the intro screen, show the
     // first question, and initialize the physics engine for orb simulation.
     beginButton.addEventListener("click", function () {
-        startingOverlay.style.display = "none";
+        startingOverlay.style.display = "none"; //when click ok button, the overlay disappears
         
+        //switches over to the section layout which includes the question box and progress bars
         questionSection.classList.remove("hidden");
         progressContainer.classList.remove("hidden");
         questionSection.style.display = "grid";
         progressContainer.style.display = "flex";
-        
-        if (!physicsInitialized) {
-            initJarPhysics();
-            physicsInitialized = true;
-        }
-        
-        renderPrologueScreen();
+
+        initJarPhysics(); //turn on physics
+        renderPrologueScreen(); //toggles prologue screen
     });
 
     // ==========================================================================
@@ -497,31 +503,37 @@ The challenge now is remembering that your value was never supposed to come sole
     // Sets up Matter.js engine, creates the jar collision boundaries, and
     // attaches custom rendering logic for orb glows. Called once on "Begin".
     function initJarPhysics() {
-        engine = Engine.create();
-        engine.gravity.y = 0.16; 
+        engine = Engine.create(); //sets up the library
+        engine.gravity.y = 0.16; //set gravity
 
         render = Render.create({
-            element: document.querySelector('#matter-jar-container'),
-            engine: engine,
+            element: document.querySelector('#matter-jar-container'), //creates a container inside your jar container
+            engine: engine, //links it to the physics engine
             options: {
-                width: width,
+                width: width, //sets width and height of container
                 height: height,
-                wireframes: false,
-                background: 'transparent'
+                wireframes: false, //makes it so the container is invisible (invisible walls)
+                background: 'transparent' //makes it so the container is invisible (invisible walls)
             }
         });
 
+        //makes sure the orbs phsyics always update
         Render.run(render);
         runner = Runner.create();
         Runner.run(runner, engine);
 
-        const jarMaterial = { isStatic: true, render: { visible: false } };
+        //setup
+        const jarMaterial = { 
+            isStatic: true, 
+            render: { visible: false } 
+        };
         const wallThickness = 8;
         const jarCenterX = width / 2;
         const jarCenterY = height / 2 - 10;
         const jarWidth = 340;
         const jarHeight = 560;
 
+        //creates the walls of the jar using Matter.js bodies
         const jarBottom = Bodies.rectangle(jarCenterX, jarCenterY + jarHeight/2 - 10, jarWidth - 40, wallThickness, { ...jarMaterial, chamfer: { radius: 15 } });
         const jarLeft = Bodies.rectangle(jarCenterX - jarWidth/2, jarCenterY, wallThickness, jarHeight - 80, jarMaterial);
         const jarRight = Bodies.rectangle(jarCenterX + jarWidth/2, jarCenterY, wallThickness, jarHeight - 80, jarMaterial);
@@ -532,8 +544,10 @@ The challenge now is remembering that your value was never supposed to come sole
         const neckLeft = Bodies.rectangle(jarCenterX - jarWidth/2 + 35, jarCenterY - jarHeight/2 + 55, 60, 40, { ...jarMaterial, angle: -Math.PI / 5 });
         const neckRight = Bodies.rectangle(jarCenterX + jarWidth/2 - 35, jarCenterY - jarHeight/2 + 55, 60, 40, { ...jarMaterial, angle: Math.PI / 5 });
 
+        //adds the walls to the physics world
         Composite.add(engine.world, [jarBottom, jarLeft, jarRight, jarBottomLeft, jarBottomRight, neckLeft, neckRight]);
 
+        // Custom rendering for orb glows: after each render, loop through all bodies and draw a glow effect on those with customStyle properties.
         const ctx = render.context;
         Events.on(render, 'afterRender', function() {
             const allBodies = Composite.allBodies(engine.world);
@@ -555,7 +569,6 @@ The challenge now is remembering that your value was never supposed to come sole
                 }
             });
         });
-        
 
         setupInteractionFlow();
     }
@@ -567,10 +580,12 @@ The challenge now is remembering that your value was never supposed to come sole
 
     // Displays the prologue/intro screen with the framing narrative.
     function renderPrologueScreen() {
-        isPrologueMode = true;
-        isEndGameMode = false;
-        mainScenarioCard.classList.add("prologue-mode");
-        
+        isPrologueMode = true; //we are now in the prolougue section!
+        isEndGameMode = false; // not in end section yet...
+        mainScenarioCard.classList.add("prologue-mode"); //set the card styling to prologue mode (smaller text, different layout)
+        optionsContainer.classList.add("hidden"); //sets the options to hidden since we don't need them for the prologue
+
+        //set the prologue text content
         mainScenarioCard.querySelector("h1").innerText = "The Final Stretch";
         mainScenarioCard.querySelector("p").innerHTML = `You’re entering the final stretch of college life.
 
@@ -582,45 +597,44 @@ There are no perfect choices. Only trade-offs.
 
 <strong>The question is: what will you choose to fill your jar with?</strong>`;
 
-        optionsContainer.classList.add("hidden");
-        confirmBtn.textContent = "Begin Experience";
-        confirmBtn.disabled = false;
+        confirmBtn.textContent = "Begin Experience"; //set button
     }
 
     function renderCurrentQuestion() {
         // Displays the current question prompt and three option choices.
         // Handles progress bar updates and button state management.
         // Transitions to endgame when all questions are exhausted.
+
+        //handles edge case of filling 9th progress bar when we hit the 8th question (since we start at index 0)
         if (currentQuestionIndex === 8) { 
             if(progressBars[8]) progressBars[8].classList.add("active");
         }
-        // ---------------------------
 
-        // Check if we hit the limit
+        // Check if we hit the limit / end of game
         if (currentQuestionIndex >= questionsData.length) {
             showEndGame();
             return;
         }
     
+        //switches out of prologue mode
         isPrologueMode = false;
         mainScenarioCard.classList.remove("prologue-mode");
         optionsContainer.classList.remove("hidden");
     
+        //changes content to questions content
         const currentData = questionsData[currentQuestionIndex];
         mainScenarioCard.querySelector("h1").innerText = currentData.time;
         mainScenarioCard.querySelector("p").innerText = currentData.prompt;
 
+        // Loops through the option cards and updates their text based on the current question's options
         cards.forEach((card, idx) => {
             const optData = currentData.options[idx];
             card.querySelector("h3").innerText = optData.title;
             card.querySelector("p").innerText = optData.text;
-            card.classList.remove('selected');
+            card.classList.remove('selected'); //resets their selected state from prev question
         });
 
-        selectedOptionIndex = null;
-        confirmBtn.textContent = "Confirm";
-        confirmBtn.disabled = true;
-
+        //update the progress bar on the top
         progressBars.forEach((bar, idx) => {
             if (idx <= currentQuestionIndex) {
                 bar.classList.add("active");
@@ -1029,9 +1043,8 @@ There are no perfect choices. Only trade-offs.
         }
     }
 
-    // Archetype display name map
+    // Maps archetype keys to their display titles shown in the final story heading
     const archetypeLabelMap = {
-        // Maps archetype keys to their display titles shown in the final story heading
         burnout: 'The Burnout',
         overwhelmed: 'The Overwhelmed',
         flourishing: 'The Flourishing',

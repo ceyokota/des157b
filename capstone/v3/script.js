@@ -12,21 +12,28 @@
     const optionsContainer = document.querySelector('.options-container');
     const mainScenarioCard = document.getElementById('main-scenario-card');
 
-    // Matter.js Module Destructuring
-    const { Engine, Render, Runner, Bodies, Composite, Events } = Matter;
-    let engine, render, runner;
-    let physicsInitialized = false;
+    // Matter.js setup
+    const Engine = Matter.Engine; //these below are pulling specifci tools from the library that we're going to use later
+    const Render = Matter.Render;
+    const Runner = Matter.Runner;
+    const Bodies = Matter.Bodies;
+    const Composite = Matter.Composite;
+    const Events = Matter.Events;
 
-    const width = 380;
-    const height = 550;
+    let physicsEngine = null; //set them up as empty to be used later
+    let physicsRenderer = null;
+    let physicsRunner = null;
+
+
+    let physicsInitialized = false; //dont set up the physics yet bc they arent being used
 
     // Game/Experience State Data Trackers
-    let isPrologueMode = true; 
-    let isEndGameMode = false;
-    let currentQuestionIndex = 0;
-    let selectedOptionIndex = null; 
+    let isPrologueMode = true; //indicate that we're currently in the opening screen (the title screen)
+    let isEndGameMode = false; //we are not in the end screen yet
+    let currentQuestionIndex = 0; //keeping track of the question we're on
+    let selectedOptionIndex = null; //sets up a variable for it to keep track of selected option, but starts as null because we haven't selected anything yet
 
-    // Score metrics tracked mathematical matrix mapping rules
+    // Score metrics, starting on 0 for everything in the beginning
     let scoreTracker = {
         career: 0,
         money: 0,
@@ -38,6 +45,7 @@
     // ==========================================================================
     // THE 10-YEAR FUTURE ARCHETYPE PRESETS
     // ==========================================================================
+    //setting up the endings
     const futureRealitiesPreset = {
         career: `Ten years later, the midnight oil you burned in the campus library has hardened into the foundation of a towering professional life. You sit in a pristine office overlooking a skyline that recognizes your name, holding the strategic influence you always craved. \n\nBut control comes with a quiet weight. Your calendar is an unyielding machine, and when your phone lights up late at night, it is always a crisis to manage, never a spontaneous invitation. You achieved the recognition you sacrificed sleep for.\n\nYou have built an impressive monument to your ambition, but sometimes, standing at the top, you wonder if you left the windows open too wide to catch a ghost of the warmth you left behind.`,
 
@@ -228,28 +236,42 @@
 
     // --- COLOR ASSIGNMENT PALETTE ---
     const colors = {
-        career: { stroke: 'rgba(115, 158, 240, 1)', glow: 'rgba(115, 158, 240, 0.5)' },       
-        money: { stroke: 'rgba(102, 210, 144, 1)', glow: 'rgba(102, 210, 144, 0.5)' },        
-        health: { stroke: 'rgba(235, 110, 110, 1)', glow: 'rgba(235, 110, 110, 0.5)' },       
-        relationships: { stroke: 'rgba(238, 126, 177, 1)', glow: 'rgba(238, 126, 177, 0.5)' },
-        freedom: { stroke: 'rgba(243, 213, 110, 1)', glow: 'rgba(243, 213, 110, 0.5)' }       
+        career: { 
+            stroke: 'rgba(115, 158, 240, 1)',
+            glow: 'rgba(115, 158, 240, 0.5)' 
+        },       
+        money: { 
+            stroke: 'rgba(102, 210, 144, 1)', 
+            glow: 'rgba(102, 210, 144, 0.5)' 
+        },        
+        health: { 
+            stroke: 'rgba(235, 110, 110, 1)', 
+            glow: 'rgba(235, 110, 110, 0.5)' 
+        },       
+        relationships: { 
+            stroke: 'rgba(238, 126, 177, 1)', 
+            glow: 'rgba(238, 126, 177, 0.5)' 
+        },
+        freedom: { 
+            stroke: 'rgba(243, 213, 110, 1)', 
+            glow: 'rgba(243, 213, 110, 0.5)' 
+        }       
     };
 
     // ==========================================================================
     // INITIALIZATION & PHYSICS CORE
     // ==========================================================================
     beginButton.addEventListener("click", function () {
-        startingOverlay.style.display = "none";
-        
-        questionSection.classList.remove("hidden");
+        startingOverlay.style.display = "none"; //when click ok button, the overlay disappears
+
+        //switches over to the section layout which includes the question box and progress bars
+        questionSection.classList.remove("hidden"); 
         progressContainer.classList.remove("hidden");
         questionSection.style.display = "grid";
         progressContainer.style.display = "flex";
         
-        if (!physicsInitialized) {
-            initJarPhysics();
-            physicsInitialized = true;
-        }
+        initJarPhysics();
+        physicsInitialized = true;
         
         renderPrologueScreen();
     });
