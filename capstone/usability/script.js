@@ -9,6 +9,8 @@
     // and main content area to avoid repeated querySelectorAll calls
     const beginButton = document.querySelector("#begin-btn");
     const startingOverlay = document.querySelector("#starting-overlay");
+    const welcomeModal = document.querySelector('#welcome-modal');
+    const welcomeCloseBtn = document.querySelector('#welcome-close-btn');
     const questionSection = document.querySelector(".question");
     const progressContainer = document.querySelector('#progress-container');
     const progressBars = document.querySelectorAll("#progress-container .bar");
@@ -490,6 +492,14 @@ The challenge now is remembering that your value was never supposed to come sole
         
         renderPrologueScreen();
     });
+
+    if (welcomeCloseBtn) {
+        welcomeCloseBtn.addEventListener("click", function () {
+            if (welcomeModal) {
+                welcomeModal.classList.add('hidden');
+            }
+        });
+    }
 
     // ==========================================================================
     // PHYSICS ENGINE INITIALIZATION
