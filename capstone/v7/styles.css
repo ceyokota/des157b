@@ -1,6 +1,5 @@
-/* ==========================================================================
-   1. CORE SETUP
-   ========================================================================== */
+/* 1. CORE SETUP
+   ------------------------------------------------------------------------- */
    body {
     margin: 0;
     min-height: 100vh;
@@ -29,9 +28,8 @@
     display: none; 
 }
 
-/* ==========================================================================
-   2. STARTING OVERLAY
-   ========================================================================== */
+/* 2. STARTING OVERLAY
+   -------------------------------------------------------------------------*/
 #starting-overlay {
     background-color: #313131;
     display: flex;
@@ -97,9 +95,8 @@
     background-color: #b32222;
 }
 
-/* ==========================================================================
-   3. INTERACTIVE LAYERING (JAR POSITIONING)
-   ========================================================================== */
+/* 3. INTERACTIVE LAYERING (JAR POSITIONING)
+   ------------------------------------------------------------------------- */
 #Q1.question {
     background-color: #313131;
     box-sizing: border-box;
@@ -145,9 +142,8 @@
     pointer-events: none; 
 }
 
-/* ==========================================================================
-   4. RIGHT COL CONTENT & CARDS
-   ========================================================================== */
+/* 4. RIGHT COL CONTENT & CARDS
+   ------------------------------------------------------------------------- */
 .text {
     display: flex;
     flex-direction: column;
@@ -186,19 +182,81 @@
     padding: 25px 35px;
 }
 
-/* MODIFIED: Expands automatically to hold both score metrics and the story block smoothly */
 .text > section:first-child.end-game-mode {
-    height: auto; 
+    height: auto;
     min-height: 275px;
     max-height: 520px;
-    padding: 25px 35px;
-    overflow-y: auto; 
+    padding: 16px 0;
+    overflow-y: auto;
+    border-radius: 0;
+    background-color: transparent;
+    color: inherit;
 }
 
-.text > section:first-child.end-game-mode hr {
-    border: none;
-    border-top: 1px dashed rgba(0, 0, 0, 0.2);
-    margin: 18px 0;
+.end-screen-panel {
+    background-color: #ffffff;
+    color: #000000;
+    border-radius: 24px;
+    padding: 22px;
+    box-sizing: border-box;
+    font-family: "DM Sans", sans-serif;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1);
+}
+
+.end-screen-panel h1,
+.end-screen-panel h2 {
+    font-family: "Courier New", Courier, monospace;
+    line-height: 1.2;
+}
+
+.end-screen-panel h1 {
+    font-size: 1.65rem;
+}
+
+.end-screen-panel h2 {
+    font-size: 1.05rem;
+}
+
+.end-screen-panel p,
+.metrics-list li {
+    font-size: 0.95rem;
+}
+
+.end-screen-panel strong {
+    font-weight: 700;
+}
+
+.end-screen-panel + .end-screen-panel {
+    margin-top: 18px;
+}
+
+.end-screen-panel h1 {
+    margin:0;
+}
+
+.end-screen-panel h2 {
+    margin: 0 0 12px 0;
+}
+
+.end-screen-panel.end-screen-title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: auto;
+    padding-top: 18px;
+    padding-bottom: 18px;
+}
+
+.metrics-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 10px;
+}
+
+.metrics-list li {
+    line-height: 1.6;
 }
 
 .interactive-flow-wrapper {
@@ -240,7 +298,7 @@
     transform: translateY(0);
 }
 
-.option-card h3 {
+.option-card h2 {
     font-size: 14px; 
     font-weight: bold;
     margin: 0 0 6px 0;
@@ -253,9 +311,8 @@
     margin: 0;
 }
 
-/* ==========================================================================
-   5. NAVIGATION BUTTON TRYS
-   ========================================================================== */
+/* 5. NAVIGATION BUTTON TRYS
+   ------------------------------------------------------------------------- */
 .confirm-container {
     display: flex;
     justify-content: flex-end; 
@@ -291,9 +348,8 @@
     transform: none;
 }
 
-/* ==========================================================================
-   6. PROGRESS HEADER TRACKER
-   ========================================================================== */
+/* 6. PROGRESS HEADER TRACKER
+   ------------------------------------------------------------------------- */
 #progress-container {
     width: 100%;
     box-sizing: border-box;
@@ -315,17 +371,14 @@
     background-color: rgba(255, 255, 255, 1); 
 }
 
-/* ==========================================================================
-   7. MODIFIERS
-   ========================================================================== */
+/* 7. MODIFIERS
+   ------------------------------------------------------------------------- */
 .hidden {
     display: none !important;
 }
 
-/* ==========================================================================
-   8. JAR LABELS
-   ========================================================================== */
-
+/* 8. JAR LABELS
+   ------------------------------------------------------------------------- */
 
 #jar-layer-wrapper { position: relative; width: 380px; height: 550px; }
 
@@ -345,7 +398,27 @@
 #chart-labels span {
     font-family: "Intel One Mono", monospace;
     font-size: 9px;
-    color: #ffffff6a;
+    color: #ffffffb3;
     text-align: center;
     width: 50px; /* Keeps labels tight under the orbs */
+}
+
+/* 9. SOURCES
+   -------------------------------------------------------------------------*/
+
+footer {
+    position: fixed;
+    left: 12px;
+    bottom: 12px;
+    z-index: 20;
+}
+
+footer a {
+    font-size: 12px;
+    color: #ffffffb3;
+    text-decoration: none;
+}
+
+footer a:hover {
+    color: #ffffff;
 }
